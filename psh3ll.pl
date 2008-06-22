@@ -235,7 +235,30 @@ sub delete {
 }
 
 sub deleteall {
-    say 'not implemented yet';
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+
+    my $bucket   = $api->bucket($bucket_name);
+    # TODO: error handling
+    my $response = $bucket->list_all
+        or die $bucket->err . ": " . $bucket->errstr;
+    foreach my $key ( @{ $response->{keys} } ) {
+        my $key_name   = $key->{key};
+        my $is_success = $bucket->delete_key($key_name);
+        if ($is_success) {
+            say "--- deleted item '"
+                . $bucket_name . "/"
+                . $key_name . "' ---";
+        }
+        else {
+            say "--- could not delete item '"
+                . $bucket_name . "/"
+                . $key_name . "' ---";
+            say $bucket->errstr if $bucket->err;
+        }
+    }
 }
 
 sub exit {
@@ -315,8 +338,8 @@ sub getfile {
 
     if ($value) {
         my $filename = $args->[1];
-        my $fh = file($filename)->openw;
-        $fh->print($value->{value}); 
+        my $fh       = file($filename)->openw;
+        $fh->print( $value->{value} );
         $fh->close;
         say "Got item '$key' as '$filename'";
     }

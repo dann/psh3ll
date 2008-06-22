@@ -428,6 +428,7 @@ sub pass {
     $config{aws_secret_access_key} = $args->[0];
     save_config();
     setup_api();
+    say 'set pass';
 }
 
 sub put {
@@ -570,6 +571,7 @@ sub user {
     $config{aws_access_key_id} = $args->[0];
     save_config();
     setup_api();
+    say 'set user';
 }
 
 __END__

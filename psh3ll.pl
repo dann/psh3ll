@@ -427,7 +427,21 @@ sub pass {
 }
 
 sub put {
-    say 'not implemented yet';
+    my $args = shift;
+    if ( !@{$args} == 2 ) {
+        say "put <id> <data>";
+        return;
+    }
+
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+    my $key = $args->[0]; 
+    my $data = $args->[1];
+    my $bucket = get_bucket();
+    my $status = $bucket->add_key( $key, $data);
+    say "Uploaded: $key";
 }
 
 sub puffilewacl {

@@ -240,7 +240,8 @@ sub deleteall {
         return;
     }
 
-    my $bucket   = $api->bucket($bucket_name);
+    my $bucket = $api->bucket($bucket_name);
+
     # TODO: error handling
     my $response = $bucket->list_all
         or die $bucket->err . ": " . $bucket->errstr;
@@ -437,15 +438,46 @@ sub put {
         say "error: bucket is not set";
         return;
     }
-    my $key = $args->[0]; 
-    my $data = $args->[1];
+    my $key    = $args->[0];
+    my $data   = $args->[1];
     my $bucket = get_bucket();
-    my $status = $bucket->add_key( $key, $data);
+    my $status = $bucket->add_key( $key, $data );
     say "Uploaded: $key";
 }
 
 sub puffilewacl {
-    say 'not implemented yet';
+    my $args = shift;
+    if ( !@{$args} == 3 ) {
+        say
+            "error: putfilewacl <id> <file> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        return;
+    }
+
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+    my $key      = $args->[0];
+    my $filename = $args->[1];
+    my $file     = file($filename);
+    my $data     = $file->slurp;
+    my $bucket   = get_bucket();
+
+    my $status = $bucket->add_key( $key, $data );
+
+    my $acl = $args->[2];
+    unless ( $acl eq 'private'
+        || $acl eq 'public-read'
+        || $acl eq 'public-read-write'
+        || $acl eq 'authenticated-read' )
+    {
+        say
+            "acl must be ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        return;
+    }
+
+    my $is_success = $bucket->set_acl( { acl_short => $acl, key => $key, } );
+    say "Uploaded: $key";
 }
 
 sub quit {

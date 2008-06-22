@@ -12,7 +12,7 @@ use File::HomeDir;
 use Perl6::Say;
 use File::Slurp;
 use Path::Class qw(dir file);
-
+use Data::Dumper;
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
 our $history
     = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll_history" );
@@ -160,9 +160,10 @@ sub term {
         my ( $text, $line, $start ) = @_;
         my @command_list = qw(bucket count get getfile getacl
             host help setacl list listbuckets listatom listrss pass user);
-        my @matched = map {
-            if ( $_ =~ /^$text/ ) {$_}
-        } @command_list;
+        my @matched = ();
+        foreach my $command (@command_list) {
+            if ( $command =~ /^$text/ ) { push @matched, $command; }
+        }
         return @matched;
     };
 

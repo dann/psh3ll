@@ -231,7 +231,27 @@ sub exit {
 }
 
 sub get {
-    say 'not implemented yet';
+    my $args = shift;
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+
+    if ( !@{$args} == 1 ) {
+        say "error: get <id>";
+        return;
+    }
+
+    my $key    = $args->[0];
+    my $bucket = get_bucket();
+    my $value  = $bucket->get_key($key);
+    if ($value) {
+        say $value->{value};
+    }
+    else {
+        say "couldn't get $key";
+        say $bucket->errstr;
+    }
 }
 
 sub getacl {

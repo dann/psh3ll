@@ -158,9 +158,12 @@ sub term {
     my $attribs = $new_term->Attribs;
     $attribs->{completion_function} = sub {
         my ( $text, $line, $start ) = @_;
-        # FIXME
-        return
-            qw(bucket count get getfile getacl host setacl list listbuckets listatom listrss pass user);
+        my @command_list = qw(bucket count get getfile getacl
+            host help setacl list listbuckets listatom listrss pass user);
+        my @matched = map {
+            if ( $_ =~ /^$text/ ) {$_}
+        } @command_list;
+        return @matched;
     };
 
     _read_history($new_term);

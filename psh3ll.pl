@@ -139,6 +139,11 @@ sub _setup_commands {
     );
 }
 
+sub get_bucket {
+    my $bucket = $api->bucket($bucket_name);
+    $bucket;
+}
+
 ### commands
 sub bucket {
     my $args = shift;
@@ -192,7 +197,30 @@ sub deletebucket {
 }
 
 sub delete {
-    say 'not implemented yet';
+    my $args = shift;
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+
+    if ( !@{$args} == 1 ) {
+        say "error: delete <id>";
+        return;
+    }
+
+    my $key        = $args->[0];
+    my $bucket     = get_bucket();
+    my $is_success = $bucket->delete_key($key);
+    if ($is_success) {
+        say "--- deleted item '" . $bucket_name . "/" . $key . "' ---";
+    }
+    else {
+        say "--- could not delete item '"
+            . $bucket_name . "/"
+            . $key . "' ---";
+        say $bucket->errstr if $bucket->err;
+    }
+
 }
 
 sub deleteall {

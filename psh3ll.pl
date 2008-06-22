@@ -279,23 +279,23 @@ sub listbuckets {
 }
 
 sub listatom {
-
+    say 'not implemented yet';
 }
 
 sub listrss {
-
+    say 'not implemented yet';
 }
 
 sub pass {
-
+    say 'not implemented yet';
 }
 
 sub put {
-
+    say 'not implemented yet';
 }
 
 sub puffilewacl {
-
+    say 'not implemented yet';
 }
 
 sub quit {

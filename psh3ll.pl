@@ -424,7 +424,10 @@ sub listrss {
 }
 
 sub pass {
-    say 'not implemented yet';
+    my $args = shift;
+    $config{aws_secret_access_key} = $args->[0];
+    save_config();
+    setup_api();
 }
 
 sub put {
@@ -563,7 +566,10 @@ sub _set_acl_for_item {
 }
 
 sub user {
-    say 'not implemented yet';
+    my $args = shift;
+    $config{aws_access_key_id} = $args->[0];
+    save_config();
+    setup_api();
 }
 
 __END__

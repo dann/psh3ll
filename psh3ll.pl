@@ -264,7 +264,33 @@ sub get {
 }
 
 sub getacl {
-    say 'not implemented yet';
+    my $args = shift;
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+
+    if ( !@{$args} >=1 ) {
+        say "getacl bucket";
+        say "getacl item <id>";
+        return;
+    }
+
+    my $object_type = $args->[0];
+    my $bucket = get_bucket();
+    my $acl;
+    if($object_type eq 'bucket') {
+         $acl = $bucket->get_acl;
+
+    } elsif ($object_type eq 'item') {
+        my $key = $args->[1];
+        if($key) {
+            say "<id> is needed";
+            return;
+        }
+        $acl = $bucket->get_acl($key);
+    }
+    say $acl;
 }
 
 sub getfile {

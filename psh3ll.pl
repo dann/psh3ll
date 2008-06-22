@@ -158,8 +158,9 @@ sub term {
     my $attribs = $new_term->Attribs;
     $attribs->{completion_function} = sub {
         my ( $text, $line, $start ) = @_;
-        my @command_list = qw(bucket count get getfile getacl
-            host help setacl list listbuckets listatom listrss pass user);
+        my @command_list = qw(bucket count get getfile getacl host
+            help setacl list listbuckets listatom
+            listrss put putfile putfilewacl pass user);
         my @matched = ();
         foreach my $command (@command_list) {
             if ( $command =~ /^$text/ ) { push @matched, $command; }

@@ -272,7 +272,13 @@ sub getacl {
     }
 
     my $object_type = $args->[0];
-    my $key         = $args->[1];
+    unless ( $object_type eq 'bucket'
+        || $object_type eq 'item' )
+    {
+        say "object type must be ['bucket'|'item'] ";
+        return;
+    }
+    my $key = $args->[1];
     my $acl;
     if ( $object_type eq 'bucket' ) {
         my $bucket = $api->bucket($key);
@@ -323,7 +329,7 @@ sub help {
         "putfilewacl <id> <file> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
     say "quit";
     say
-        "setacl ['bucket'|'item'] ¥<id¥> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        "setacl ['bucket'|'item'] <id> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
     say "user [username]";
 }
 
@@ -384,7 +390,82 @@ sub quit {
 }
 
 sub setacl {
-    say 'not implemented yet';
+    my $args = shift;
+    if ( !@{$args} == 3 ) {
+        say
+            "setacl ['bucket'|'item'] <id> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        return;
+    }
+
+    my $object_type = $args->[0];
+    warn $object_type;
+    unless ( $object_type eq 'bucket'
+        || $object_type eq 'item' )
+    {
+        say "object type must be ['bucket'|'item'] ";
+        return;
+    }
+
+    my $key = $args->[1];
+
+    my $acl = $args->[2];
+    unless ( $acl eq 'private'
+        || $acl eq 'public-read'
+        || $acl eq 'public-read-write'
+        || $acl eq 'authenticated-read' )
+    {
+        say
+            "acl must be ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        return;
+    }
+
+    if ( $object_type eq 'bucket' ) {
+        my $is_succeeded = _set_acl_for_bucket( $key, $acl );
+        return unless $is_succeeded;
+    }
+    elsif ( $object_type eq 'item' ) {
+        unless ($bucket_name) {
+            say "error: bucket is not set";
+            return;
+        }
+        my $is_succeeded = _set_acl_for_item( $key, $acl );
+        return unless $is_succeeded;
+    }
+    else {
+        say
+            "error: setacl ['bucket'|'item'] ¥<id¥> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+    }
+}
+
+sub _set_acl_for_bucket {
+    my $bucket_name = shift;
+    my $acl         = shift;
+    my $bucket      = $api->bucket($bucket_name);
+    my $is_success  = $bucket->set_acl( { acl_short => $acl } );
+    if ($is_success) {
+        say 'success';
+        return 1;
+    }
+    else {
+        say $bucket->err . ": " . $bucket->errstr;
+        return 0;
+    }
+}
+
+sub _set_acl_for_item {
+    my $key        = shift;
+    my $acl        = shift;
+    my $bucket     = get_bucket();
+    my $is_success = $bucket->set_acl( { acl_short => $acl, key => $key, } );
+    if ($is_success) {
+        say 'success';
+        return 1;
+    }
+    else {
+        say $bucket->err . ": " . $bucket->errstr;
+        return 0;
+    }
+
 }
 
 sub user {

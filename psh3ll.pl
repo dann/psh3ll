@@ -12,6 +12,7 @@ use Data::Dumper;
 use File::HomeDir;
 use Perl6::Say;
 use Data::Dumper;
+use Path::Class;
 
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
 our %config = ();
@@ -297,7 +298,32 @@ sub getacl {
 }
 
 sub getfile {
-    say 'not implemented yet';
+    my $args = shift;
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+
+    if ( !@{$args} == 2 ) {
+        say "error: getfile <id> <file>";
+        return;
+    }
+
+    my $key    = $args->[0];
+    my $bucket = get_bucket();
+    my $value  = $bucket->get_key($key);
+
+    if ($value) {
+        my $filename = $args->[1];
+        my $fh = file($filename)->openw;
+        $fh->print($value->{value}); 
+        $fh->close;
+        say "Got item '$key' as '$filename'";
+    }
+    else {
+        say "Couldn't get $key";
+        say $bucket->errstr;
+    }
 }
 
 sub gettorrent {
@@ -354,7 +380,7 @@ sub list {
         my $key_name  = $key->{key};
         my $key_size  = $key->{size};
         my $key_owner = $key->{owner};
-        say "key='$key_name', owner='$key_owner', size=$key_size";
+        say "key='$key_name', size=$key_size";
     }
 }
 
@@ -398,7 +424,6 @@ sub setacl {
     }
 
     my $object_type = $args->[0];
-    warn $object_type;
     unless ( $object_type eq 'bucket'
         || $object_type eq 'item' )
     {

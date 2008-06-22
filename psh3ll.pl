@@ -180,11 +180,12 @@ sub count {
         say "error: bucket is not set";
         return;
     }
-    my $bucket   = get_bucket();
+    my $bucket = get_bucket();
+
     # TODO
     my $response = $bucket->list_all
         or die $bucket->err . ": " . $bucket->errstr;
-    say scalar(@{ $response->{keys} });
+    say scalar( @{ $response->{keys} } );
 }
 
 sub deletebucket {
@@ -265,29 +266,25 @@ sub get {
 
 sub getacl {
     my $args = shift;
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
-
-    if ( !@{$args} >=1 ) {
-        say "getacl bucket";
-        say "getacl item <id>";
+    if ( !@{$args} == 2 ) {
+        say "getacl [bucket|item] <id>";
         return;
     }
 
     my $object_type = $args->[0];
-    my $bucket = get_bucket();
+    my $key         = $args->[1];
     my $acl;
-    if($object_type eq 'bucket') {
-         $acl = $bucket->get_acl;
+    if ( $object_type eq 'bucket' ) {
+        my $bucket = $api->bucket($key);
+        $acl = $bucket->get_acl;
 
-    } elsif ($object_type eq 'item') {
-        my $key = $args->[1];
-        if($key) {
-            say "<id> is needed";
+    }
+    elsif ( $object_type eq 'item' ) {
+        unless ($bucket_name) {
+            say "error: bucket is not set";
             return;
         }
+        my $bucket = get_bucket();
         $acl = $bucket->get_acl($key);
     }
     say $acl;
@@ -348,9 +345,10 @@ sub list {
     my $response = $bucket->list_all
         or die $api->err . ": " . $api->errstr;
     foreach my $key ( @{ $response->{keys} } ) {
-        my $key_name = $key->{key};
-        my $key_size = $key->{size};
-        say "Bucket contains key '$key_name' of size $key_size";
+        my $key_name  = $key->{key};
+        my $key_size  = $key->{size};
+        my $key_owner = $key->{owner};
+        say "key='$key_name', owner='$key_owner', size=$key_size";
     }
 }
 

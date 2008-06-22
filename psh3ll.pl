@@ -175,7 +175,16 @@ sub createbucket {
 }
 
 sub count {
-    say 'not implemented yet';
+    my $args = shift;
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return;
+    }
+    my $bucket   = get_bucket();
+    # TODO
+    my $response = $bucket->list_all
+        or die $bucket->err . ": " . $bucket->errstr;
+    say scalar(@{ $response->{keys} });
 }
 
 sub deletebucket {

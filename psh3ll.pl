@@ -2,16 +2,14 @@
 use strict;
 use warnings;
 use Net::Amazon::S3;
-use Term::ReadLine;
 use Encode;
+use Term::ReadLine;
 use ExtUtils::MakeMaker ();
 use File::HomeDir;
 use File::Spec;
 use YAML;
-use Data::Dumper;
 use File::HomeDir;
 use Perl6::Say;
-use Data::Dumper;
 use Path::Class;
 
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );

@@ -10,14 +10,17 @@ use File::Spec;
 use YAML;
 use File::HomeDir;
 use Perl6::Say;
-use Path::Class;
+use File::Slurp;
+use Path::Class qw(dir file);
 
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
+our $history = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll_history");
 our %config = ();
 our $changed;
 our $api;
 our %commands;
 our $bucket_name;
+our $term_;
 
 main();
 
@@ -54,10 +57,10 @@ sub _show_banner {
 }
 
 sub _input_loop {
-    my $term   = Term::ReadLine->new('pSh3ll');
+    $term_ = term('pSh3ll');
     my $prompt = 'psh3ll> ';
 
-    while ( defined( my $input = eval { $term->readline($prompt) } ) ) {
+    while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
         my @tokens = split( /\s/, $input );
         return unless ( @tokens >= 1 );
 
@@ -68,7 +71,7 @@ sub _input_loop {
         }
         _dispatch_on_input( $command, \@tokens );
 
-        $term->addhistory($input);
+        $term_->addhistory($input);
     }
 
     return 1;
@@ -87,7 +90,7 @@ sub _dispatch_on_input {
 }
 
 sub _quit {
-
+    _write_history($term_);
 }
 
 sub prompt {
@@ -571,5 +574,53 @@ sub user {
     setup_api();
     say 'set user';
 }
+
+sub _history_file { # XXX
+    return file( File::HomeDir->my_home, '.pirl-history' )->stringify;
+}
+
+
+sub term {
+    my $name = shift;
+    my $new_term = Term::ReadLine->new( $name );
+    _read_history( $new_term );
+    return $new_term;
+}
+
+
+sub _read_history {
+    my $term = shift;
+    my $h    = _history_file;
+    #warn "read history from $h\n"; # XXX
+    if ( $term->Features->{readHistory} ) {
+        $term->ReadHistory( $h );
+    } elsif ( $term->Features->{setHistory} ) {
+        if ( -e $h ) {
+            require File::Slurp;
+            my @h = File::Slurp::read_file( $h );
+            chomp @h;
+            $term->SetHistory( @h );
+        }
+    } else {
+        # warn "Your ReadLine doesn't support setHistory\n";
+    }
+
+}
+
+sub _write_history {
+   my $term = shift;
+   my $h    = _history_file;
+   #warn "write history to $h\n"; # XXX
+   if ( $term->Features->{writeHistory} ) {
+       $term->WriteHistory( $h );
+   } elsif ( $term->Features->{getHistory} ) {
+       require File::Slurp;
+       my @h = map { "$_\n" } $term->GetHistory;
+       File::Slurp::write_file( $h, @h );
+   } else {
+       # warn "Your ReadLine doesn't support getHistory\n";
+   }
+}
+
 
 __END__

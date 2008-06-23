@@ -13,14 +13,12 @@ use Encode;
 use Term::ReadLine;
 use ExtUtils::MakeMaker ();
 use File::HomeDir;
-use File::Spec;
-use YAML;
-use File::HomeDir;
-use Perl6::Say;
-use File::Slurp;
 use Path::Class qw(dir file);
+use File::Slurp;
+use YAML;
+use Perl6::Say;
 
-our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
+our $conf = file( File::HomeDir->my_home, ".psh3ll" );
 our %config = ();
 our $changed;
 our $api;
@@ -159,7 +157,6 @@ sub _read_history {
     }
     elsif ( $term->Features->{setHistory} ) {
         if ( -e $h ) {
-            require File::Slurp;
             my @h = File::Slurp::read_file($h);
             chomp @h;
             $term->SetHistory(@h);

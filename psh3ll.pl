@@ -12,16 +12,18 @@ use File::HomeDir;
 use Perl6::Say;
 use File::Slurp;
 use Path::Class qw(dir file);
-use Data::Dumper;
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
-our $history
-    = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll_history" );
 our %config = ();
 our $changed;
 our $api;
 our %commands;
 our $bucket_name;
 our $term_;
+our @command_list = qw(
+    bucket count createbucket delete deleteall deletebucket
+    exit get getfile getacl gettorrent head host help list listbuckets listatom
+    listrss pass put putfile putfilewacl quit setacl user
+);
 
 main();
 
@@ -63,7 +65,7 @@ sub _input_loop {
 
     while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
         my @tokens = split( /\s/, $input );
-        next unless  @tokens >= 1;
+        next unless @tokens >= 1;
 
         my $command = shift @tokens;
         if ( $command eq 'quit' || $command eq 'exit' ) {
@@ -113,33 +115,7 @@ sub save_config {
 }
 
 sub _setup_commands {
-    %commands = (
-        bucket       => \&bucket,
-        count        => \&count,
-        createbucket => \&createbucket,
-        delete       => \&delete,
-        deleteall    => \&deleteall,
-        deletebucket => \&deletebucket,
-        exit         => \&exit,
-        get          => \&get,
-        getacl       => \&getacl,
-        getfile      => \&getfile,
-        gettorrent   => \&gettorrent,
-        head         => \&head,
-        host         => \&host,
-        help         => \&help,
-        list         => \&list,
-        listbuckets  => \&listbuckets,
-        listatom     => \&listatom,
-        listrss      => \&listrss,
-        pass         => \&pass,
-        put          => \&put,
-        putfile      => \&putfile,
-        putfilewacl  => \&putfilewacl,
-        quit         => \&quit,
-        setacl       => \&setacl,
-        user         => \&user,
-    );
+    %commands = map { $_ => \&$_ } @command_list;
 }
 
 sub get_bucket {
@@ -147,7 +123,7 @@ sub get_bucket {
     $bucket;
 }
 
-sub _history_file {    # XXX
+sub _history_file {
     return file( File::HomeDir->my_home, '.psh3ll_history' )->stringify;
 }
 
@@ -158,11 +134,6 @@ sub term {
     my $attribs = $new_term->Attribs;
     $attribs->{completion_function} = sub {
         my ( $text, $line, $start ) = @_;
-        my @command_list = qw(
-            bucket count get getfile getacl host
-            help setacl list listbuckets listatom
-            listrss put putfile putfilewacl pass user
-        );
         my @matched = grep { $_ =~ /^$text/ } @command_list;
         return @matched;
     };
@@ -175,7 +146,6 @@ sub _read_history {
     my $term = shift;
     my $h    = _history_file;
 
-    #warn "read history from $h\n"; # XXX
     if ( $term->Features->{readHistory} ) {
         $term->ReadHistory($h);
     }
@@ -198,7 +168,6 @@ sub _write_history {
     my $term = shift;
     my $h    = _history_file;
 
-    #warn "write history to $h\n"; # XXX
     if ( $term->Features->{writeHistory} ) {
         $term->WriteHistory($h);
     }

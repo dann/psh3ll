@@ -2,6 +2,12 @@
 use strict;
 use warnings;
 
+=head1 DESCRIPTION
+
+This is a simple shell to Amazon S3. 
+
+=cut
+
 use Net::Amazon::S3;
 use Encode;
 use Term::ReadLine;
@@ -614,3 +620,37 @@ sub user {
 }
 
 __END__
+
+=head1 NAME
+
+psh3ll.pl - Simple shell to Amazon S3
+
+=head1 SYNOPSIS
+
+  bucket [bucketname]
+  count [prefix]
+  createbucket
+  delete <id>
+  deleteall [prefix]
+  deletebucket
+  exit
+  get
+  getacl ['bucket'|'item'] <id>
+  getfile <id> <file>
+  gettorrent <id>
+  head ['bucket'|'item'] <id>
+  host [hostname]
+  list [prefix] [max]
+  listatom [prefix] [max]
+  listrss [prefix] [max]
+  listbuckets
+  pass [password]
+  put <id> <data>
+  putfile <id> <file>
+  putfilewacl <id> <file> ['private'|'public-read'|'public-read-write'|'authenticated-read']
+  quit
+  setacl ['bucket'|'item'] <id> ['private'|'public-read'|'public-read-write'|'authenticated-read']
+  user [username]
+
+=cut
+

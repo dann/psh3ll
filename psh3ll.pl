@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+
 use Net::Amazon::S3;
 use Encode;
 use Term::ReadLine;
@@ -12,6 +13,7 @@ use File::HomeDir;
 use Perl6::Say;
 use File::Slurp;
 use Path::Class qw(dir file);
+
 our $conf = File::Spec->catfile( File::HomeDir->my_home, ".psh3ll" );
 our %config = ();
 our $changed;

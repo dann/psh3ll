@@ -4,7 +4,8 @@ use warnings;
 
 =head1 DESCRIPTION
 
-This is a simple shell to Amazon S3. 
+The pSh3ll is a perl based command shell for managing your Amazon S3 objects.
+It is built upon the Amazon S3 REST perl library.
 
 =cut
 
@@ -620,7 +621,7 @@ __END__
 
 =head1 NAME
 
-psh3ll.pl - Simple shell to Amazon S3
+psh3ll.pl - Amazon S3 command shell for Perl
 
 =head1 SYNOPSIS
 

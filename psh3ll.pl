@@ -63,7 +63,7 @@ sub _input_loop {
 
     while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
         my @tokens = split( /\s/, $input );
-        return unless ( @tokens >= 1 );
+        next unless  @tokens >= 1;
 
         my $command = shift @tokens;
         if ( $command eq 'quit' || $command eq 'exit' ) {
@@ -148,7 +148,7 @@ sub get_bucket {
 }
 
 sub _history_file {    # XXX
-    return file( File::HomeDir->my_home, '.pirl-history' )->stringify;
+    return file( File::HomeDir->my_home, '.psh3ll_history' )->stringify;
 }
 
 sub term {
@@ -158,13 +158,12 @@ sub term {
     my $attribs = $new_term->Attribs;
     $attribs->{completion_function} = sub {
         my ( $text, $line, $start ) = @_;
-        my @command_list = qw(bucket count get getfile getacl host
+        my @command_list = qw(
+            bucket count get getfile getacl host
             help setacl list listbuckets listatom
-            listrss put putfile putfilewacl pass user);
-        my @matched = ();
-        foreach my $command (@command_list) {
-            if ( $command =~ /^$text/ ) { push @matched, $command; }
-        }
+            listrss put putfile putfilewacl pass user
+        );
+        my @matched = grep { $_ =~ /^$text/ } @command_list;
         return @matched;
     };
 
@@ -518,7 +517,7 @@ sub put {
     say "Uploaded: $key";
 }
 
-sub puffilewacl {
+sub putfilewacl {
     my $args = shift;
     if ( !@{$args} == 3 ) {
         say

@@ -650,5 +650,18 @@ psh3ll.pl - Amazon S3 command shell for Perl
   setacl ['bucket'|'item'] <id> ['private'|'public-read'|'public-read-write'|'authenticated-read']
   user [username]
 
+=head1 AUTHOR
+
+Dann E<lt>techmemo (at) gmail.comE<gt>
+
+=head1 LICENSE
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<http://rubyforge.org/projects/rsh3ll/>
+
 =cut
 

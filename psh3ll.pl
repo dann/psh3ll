@@ -76,7 +76,7 @@ sub _input_loop {
     my $prompt = 'psh3ll> ';
 
     while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
-        my ($command, $tokens) = parse_input($input);
+        my ( $command, $tokens ) = parse_input($input);
         next unless $command;
         if ( $command eq 'quit' || $command eq 'exit' ) {
             quit();
@@ -95,12 +95,11 @@ sub parse_input {
     my @tokens = split( /\s/, $input );
     return unless @tokens >= 1;
     my $command = shift @tokens;
-    return ($command, \@tokens);
+    return ( $command, \@tokens );
 }
 
 sub _dispatch_on_input {
-    my $command = shift;
-    my $args    = shift;
+    my ( $command, $args ) = @_;
 
     if ( exists $commands{$command} ) {
         $commands{$command}($args);
@@ -253,10 +252,7 @@ sub createbucket {
 
 sub count {
     my $args = shift;
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
     my $bucket = get_bucket();
 
     # TODO
@@ -266,10 +262,7 @@ sub count {
 }
 
 sub deletebucket {
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
 
     my $bucket = $api->bucket($bucket_name);
     $bucket->delete_bucket;
@@ -572,10 +565,9 @@ sub setacl {
 }
 
 sub _set_acl_for_bucket {
-    my $bucket_name = shift;
-    my $acl         = shift;
-    my $bucket      = $api->bucket($bucket_name);
-    my $is_success  = $bucket->set_acl( { acl_short => $acl } );
+    my ( $bucket_name, $acl ) = @_;
+    my $bucket = $api->bucket($bucket_name);
+    my $is_success = $bucket->set_acl( { acl_short => $acl } );
     if ($is_success) {
         say 'success';
         return 1;
@@ -587,9 +579,8 @@ sub _set_acl_for_bucket {
 }
 
 sub _set_acl_for_item {
-    my $key        = shift;
-    my $acl        = shift;
-    my $bucket     = get_bucket();
+    my ( $key, $acl ) = @_;
+    my $bucket = get_bucket();
     my $is_success = $bucket->set_acl( { acl_short => $acl, key => $key, } );
     if ($is_success) {
         say 'success';

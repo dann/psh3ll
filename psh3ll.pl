@@ -59,11 +59,16 @@ sub shell {
     _quit();
 }
 
+### main routine related methods
 sub _show_banner {
     say;
     say "Welcome to pSh3ll (Amazon S3 command shell for Perl) (c) 2008 Dann.";
     say "Type 'help' for command list.";
     say;
+}
+
+sub _setup_commands {
+    %commands = map { $_ => \&$_ } @command_list;
 }
 
 sub _input_loop {
@@ -103,6 +108,7 @@ sub _quit {
     _write_history($term_);
 }
 
+### configuration related methods
 sub prompt {
     my $value = ExtUtils::MakeMaker::prompt( $_[0] );
     $changed++;
@@ -119,10 +125,6 @@ sub setup_config {
 sub save_config {
     YAML::DumpFile( $conf, \%config );
     chmod 0600, $conf;
-}
-
-sub _setup_commands {
-    %commands = map { $_ => \&$_ } @command_list;
 }
 
 ### term related methods

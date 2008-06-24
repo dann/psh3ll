@@ -125,14 +125,7 @@ sub _setup_commands {
     %commands = map { $_ => \&$_ } @command_list;
 }
 
-sub get_bucket {
-    my $bucket = $api->bucket($bucket_name);
-    $bucket;
-}
-
-sub _history_file {
-    return file( File::HomeDir->my_home, '.psh3ll_history' )->stringify;
-}
+### term related methods
 
 sub term {
     my $name     = shift;
@@ -147,6 +140,10 @@ sub term {
 
     _read_history($new_term);
     return $new_term;
+}
+
+sub _history_file {
+    return file( File::HomeDir->my_home, '.psh3ll_history' )->stringify;
 }
 
 sub _read_history {
@@ -186,6 +183,34 @@ sub _write_history {
 
         # warn "Your ReadLine doesn't support getHistory\n";
     }
+}
+
+### command utility methods
+sub get_bucket {
+    my $bucket = $api->bucket($bucket_name);
+    $bucket;
+}
+
+sub is_valid_acl {
+    my $acl = shift;
+    unless ( $acl eq 'private'
+        || $acl eq 'public-read'
+        || $acl eq 'public-read-write'
+        || $acl eq 'authenticated-read' )
+    {
+        say
+            "acl must be ['private'|'public-read'|'public-read-write'|'authenticated-read']";
+        return 0;
+    }
+    return 1;
+}
+
+sub is_bucket_set {
+    unless ($bucket_name) {
+        say "error: bucket is not set";
+        return 0;
+    }
+    return 1;
 }
 
 ### commands
@@ -252,11 +277,7 @@ sub deletebucket {
 
 sub delete {
     my $args = shift;
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
-
+    return unless is_bucket_set();
     if ( !@{$args} == 1 ) {
         say "error: delete <id>";
         return;
@@ -278,10 +299,7 @@ sub delete {
 }
 
 sub deleteall {
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
 
     my $bucket = $api->bucket($bucket_name);
 
@@ -310,10 +328,7 @@ sub exit {
 
 sub get {
     my $args = shift;
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
 
     if ( !@{$args} == 1 ) {
         say "error: get <id>";
@@ -366,10 +381,7 @@ sub getacl {
 
 sub getfile {
     my $args = shift;
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
 
     if ( !@{$args} == 2 ) {
         say "error: getfile <id> <file>";
@@ -435,10 +447,7 @@ sub host {
 }
 
 sub list {
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
+    return unless is_bucket_set();
 
     my $bucket   = $api->bucket($bucket_name);
     my $response = $bucket->list_all
@@ -476,15 +485,12 @@ sub pass {
 
 sub put {
     my $args = shift;
+    return unless is_bucket_set();
     if ( !@{$args} == 2 ) {
         say "put <id> <data>";
         return;
     }
 
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
     my $key    = $args->[0];
     my $data   = $args->[1];
     my $bucket = get_bucket();
@@ -494,16 +500,13 @@ sub put {
 
 sub putfilewacl {
     my $args = shift;
+    return unless is_bucket_set();
     if ( !@{$args} == 3 ) {
         say
             "error: putfilewacl <id> <file> ['private'|'public-read'|'public-read-write'|'authenticated-read']";
         return;
     }
 
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
     my $key      = $args->[0];
     my $filename = $args->[1];
     my $file     = file($filename);
@@ -513,15 +516,7 @@ sub putfilewacl {
     my $status = $bucket->add_key( $key, $data );
 
     my $acl = $args->[2];
-    unless ( $acl eq 'private'
-        || $acl eq 'public-read'
-        || $acl eq 'public-read-write'
-        || $acl eq 'authenticated-read' )
-    {
-        say
-            "acl must be ['private'|'public-read'|'public-read-write'|'authenticated-read']";
-        return;
-    }
+    return unless is_valid_acl($acl);
 
     my $is_success = $bucket->set_acl( { acl_short => $acl, key => $key, } );
     say "Uploaded: $key";
@@ -550,25 +545,15 @@ sub setacl {
     my $key = $args->[1];
 
     my $acl = $args->[2];
-    unless ( $acl eq 'private'
-        || $acl eq 'public-read'
-        || $acl eq 'public-read-write'
-        || $acl eq 'authenticated-read' )
-    {
-        say
-            "acl must be ['private'|'public-read'|'public-read-write'|'authenticated-read']";
-        return;
-    }
+    return unless is_valid_acl($acl);
 
     if ( $object_type eq 'bucket' ) {
         my $is_succeeded = _set_acl_for_bucket( $key, $acl );
         return unless $is_succeeded;
     }
     elsif ( $object_type eq 'item' ) {
-        unless ($bucket_name) {
-            say "error: bucket is not set";
-            return;
-        }
+        return unless is_bucket_set();
+
         my $is_succeeded = _set_acl_for_item( $key, $acl );
         return unless $is_succeeded;
     }

@@ -76,7 +76,7 @@ sub _input_loop {
     my $prompt = 'psh3ll> ';
 
     while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
-        my ( $command, $tokens ) = parse_input($input);
+        my ( $command, $tokens ) = _parse_input($input);
         next unless $command;
         if ( $command eq 'quit' || $command eq 'exit' ) {
             quit();
@@ -90,7 +90,7 @@ sub _input_loop {
     return 1;
 }
 
-sub parse_input {
+sub _parse_input {
     my $input = shift;
     my @tokens = split( /\s/, $input );
     return unless @tokens >= 1;

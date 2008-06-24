@@ -182,7 +182,6 @@ sub _write_history {
         $term->WriteHistory($h);
     }
     elsif ( $term->Features->{getHistory} ) {
-        require File::Slurp;
         my @h = map {"$_\n"} $term->GetHistory;
         File::Slurp::write_file( $h, @h );
     }

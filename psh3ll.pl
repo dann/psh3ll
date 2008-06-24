@@ -76,20 +76,26 @@ sub _input_loop {
     my $prompt = 'psh3ll> ';
 
     while ( defined( my $input = eval { $term_->readline($prompt) } ) ) {
-        my @tokens = split( /\s/, $input );
-        next unless @tokens >= 1;
-
-        my $command = shift @tokens;
+        my ($command, $tokens) = parse_input($input);
+        next unless $command;
         if ( $command eq 'quit' || $command eq 'exit' ) {
             quit();
             return;
         }
-        _dispatch_on_input( $command, \@tokens );
+        _dispatch_on_input( $command, $tokens );
 
         $term_->addhistory($input);
     }
 
     return 1;
+}
+
+sub parse_input {
+    my $input = shift;
+    my @tokens = split( /\s/, $input );
+    return unless @tokens >= 1;
+    my $command = shift @tokens;
+    return ($command, \@tokens);
 }
 
 sub _dispatch_on_input {

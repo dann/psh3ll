@@ -233,11 +233,7 @@ sub bucket {
 }
 
 sub createbucket {
-    unless ($bucket_name) {
-        say "error: bucket is not set";
-        return;
-    }
-
+    return unless is_bucket_set();
     my $bucket = $api->add_bucket( { bucket => $bucket_name } );
 
     if ( $api->err ) {
@@ -369,10 +365,7 @@ sub getacl {
 
     }
     elsif ( $object_type eq 'item' ) {
-        unless ($bucket_name) {
-            say "error: bucket is not set";
-            return;
-        }
+        return unless is_bucket_set();
         my $bucket = get_bucket();
         $acl = $bucket->get_acl($key);
     }

@@ -442,8 +442,14 @@ sub host {
 sub list {
     return unless is_bucket_set();
 
+    my ($prefix, $count) = @{ $_[0] };
+
+    my $opt = {};
+    $opt->{prefix} = $prefix if (defined $prefix);
+    $opt->{'max-keys'} = $count if (defined $count);
+
     my $bucket   = $api->bucket($bucket_name);
-    my $response = $bucket->list_all
+    my $response = $bucket->list_all($opt)
         or die $api->err . ": " . $api->errstr;
     foreach my $key ( @{ $response->{keys} } ) {
         my $key_name  = $key->{key};
